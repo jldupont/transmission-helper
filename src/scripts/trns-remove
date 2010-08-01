@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+"""
+	@author: Jean-Lou Dupont
+"""
+from transmission_helper.remove import main
+
+main()
