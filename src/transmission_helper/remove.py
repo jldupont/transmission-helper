@@ -49,7 +49,7 @@ def main():
     parser.add_option("-s", "--sym",   dest="sym",   help="Generate symlinks",      default=True)
     parser.add_option("-d", "--sdir",  dest="sdir",  help="Directory for symlinks", default="~/completed_torrents")
     parser.add_option(      "--host",  dest="host",  help="RPC Host", default="localhost")    
-    (options, args) = parser.parse_args()
+    (options, _args) = parser.parse_args()
     
     sdir=os.path.expanduser(options.sdir)
     
@@ -74,8 +74,10 @@ def main():
         status=list[i].status
         if status=='seeding':
             torrent=list[i]
-            print "! processing completed: %s" % torrent
-            process(dl, options.sym, sdir, torrent)
-            remove(c, i)
+            print "(info) processing completed: %s" % torrent
+            try:    process(dl, options.sym, sdir, torrent)
+            except: print "(error) processing: %s" % torrent
+            try:    remove(c, i)
+            except: print "(error) removing: %s" % torrent
 
 main()
