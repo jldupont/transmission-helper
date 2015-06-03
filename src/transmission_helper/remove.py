@@ -18,8 +18,8 @@ except:
     sys.exit(1)
 
 
-def get_client_session(host, port):
-    c=transmissionrpc.Client(host, port=port)
+def get_client_session(host, port, user=None, password=None):
+    c=transmissionrpc.Client(host, port=port, user=user, password=password)
     return (c, c.get_session())
 
 def check_symdir(path):
@@ -36,8 +36,8 @@ def process(download_dir, sym, sym_dir, torrent):
     os.symlink(src, link_name)
     
 
-def remove(client, id):
-    client.remove(id)
+def remove(client, cid):
+    client.remove(cid)
 
 ## ===================================================================
     
@@ -48,7 +48,11 @@ def main():
     parser.add_option("-p", "--port",  dest="port",  help="RPC Port", default=9091)
     parser.add_option("-s", "--sym",   dest="sym",   help="Generate symlinks",      default=True)
     parser.add_option("-d", "--sdir",  dest="sdir",  help="Directory for symlinks", default="~/completed_torrents")
-    parser.add_option(      "--host",  dest="host",  help="RPC Host", default="localhost")    
+    parser.add_option(      "--host",  dest="host",  help="RPC Host", default="localhost")
+    
+    parser.add_option(      "--user",  dest="user",      help="RPC User", default=None)
+    parser.add_option(      "--pass",  dest="password",  help="RPC Password", default=None)
+        
     (options, _args) = parser.parse_args()
     
     sdir=os.path.expanduser(options.sdir)
@@ -62,18 +66,18 @@ def main():
             print "(error) cannot create directory "
             sys.exit(1)
     try:
-        c, s=get_client_session(options.host, options.port)
+        c, s=get_client_session(options.host, options.port, user=options.user, password=options.password)
     except:
         print "(error) cannot get session to Transmission (%s:%s)" % (options.host, options.port)
         sys.exit(1)
         
     dl=s.download_dir
     
-    list=c.list()
-    for i in list.iterkeys():
-        status=list[i].status
+    alist=c.list()
+    for i in alist.iterkeys():
+        status=alist[i].status
         if status=='seeding':
-            torrent=list[i]
+            torrent=alist[i]
             print "(info) processing completed: %s" % torrent
             try:    process(dl, options.sym, sdir, torrent)
             except: print "(error) processing: %s" % torrent
